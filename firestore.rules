@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: academies/{academyId}/students
+    // Fields: id, name, rollNumber, fatherName, classLevel, section, fee, whatsappNumber, photo, password, etc.
+    //
+    // Collection: academies/{academyId}/attendance
+    // Fields: date, studentId, status
+    //
+    // Collection: academies/{academyId}/testResults
+    // Fields: id, testId, studentId, obtainedMarks
+    //
+    // Collection: academies/{academyId}/feePayments
+    // Fields: id, studentId, month, amount, date
+    //
+    // Collection: academies/{academyId}/timetable
+    // Fields: id, day, time, subject, classLevel, section
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isMasterAdmin() {
+      return isAuthenticated() && 
+        (
+          ("email" in request.auth.token && (request.auth.token.email.matches("(?i)asmatullah9327@gmail.com") || request.auth.token.email.matches("(?i)asmatn628@gmail.com")))
+        );
+    }
+
+    function isAdmin() {
+      return isMasterAdmin() ||
+        (
+          "email" in request.auth.token &&
+          exists(/databases/$(database)/documents/academies/main_academy/staff/$(request.auth.token.email.lower())) &&
+          get(/databases/$(database)/documents/academies/main_academy/staff/$(request.auth.token.email.lower())).data.role in ['admin', 'superadmin']
+        );
+    }
+
+    function isAcademyMember(academyId) {
+      return isAuthenticated();
+    }
+
+    // Validation helpers
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidStudent(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.rollNumber is string &&
+             data.classLevel is string &&
+             data.section is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /test/connection {
+      allow read: if true;
+    }
+
+    match /academies/{academyId} {
+      allow read: if isAuthenticated();
+      
+      match /settings/global {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /students/{studentId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /attendance/{recordId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /tests/{testId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /testResults/{resultId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /feePayments/{paymentId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /subjects/{subjectId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /sections/{sectionId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /timetable/{entryId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+
+      match /staff/{staffId} {
+        allow read: if isAdmin() || (isAuthenticated() && "email" in request.auth.token && request.auth.token.email.lower() == staffId.lower());
+        allow write: if isMasterAdmin();
+      }
+
+      match /staffPayments/{paymentId} {
+        allow read: if isAdmin();
+        allow write: if isAdmin();
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

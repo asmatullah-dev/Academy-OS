@@ -1,0 +1,5 @@
+{
+  "name": "Academy OS",
+  "description": "Professional school management system with secure cloud sync, student/admin login, and comprehensive tools for attendance, results, fees, and payroll.",
+  "requestFramePermissions": []
+}

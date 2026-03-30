@@ -1,0 +1,196 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Student record including academic and bio data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "rollNumber": { "type": "string" },
+        "fatherName": { "type": "string" },
+        "classLevel": { "type": "string" },
+        "section": { "type": "string" },
+        "fee": { "type": "number" },
+        "whatsappNumber": { "type": "string" },
+        "motherLanguage": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "age": { "type": "string" },
+        "weight": { "type": "string" },
+        "bioData": { "type": "string" },
+        "photo": { "type": "string" },
+        "password": { "type": "string" }
+      },
+      "required": ["id", "name", "rollNumber", "fatherName", "classLevel", "section", "whatsappNumber"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Academic subject",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Section": {
+      "title": "Section",
+      "description": "Class section with specific subjects",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "classLevel": { "type": "string" },
+        "subjects": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "name", "classLevel"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Daily attendance for a student",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "studentId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Present", "Absent", "Late"] }
+      },
+      "required": ["date", "studentId", "status"]
+    },
+    "Test": {
+      "title": "Test",
+      "description": "Academic test or examination",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "subject": { "type": "string" },
+        "classLevel": { "type": "string" },
+        "section": { "type": "string" },
+        "totalMarks": { "type": "number" }
+      },
+      "required": ["id", "date", "subject", "classLevel", "section", "totalMarks"]
+    },
+    "TestResult": {
+      "title": "TestResult",
+      "description": "Result of a student in a specific test",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "testId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "obtainedMarks": { "type": "number" }
+      },
+      "required": ["id", "testId", "studentId", "obtainedMarks"]
+    },
+    "FeePayment": {
+      "title": "FeePayment",
+      "description": "Record of fee payment by a student",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "month": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "studentId", "month", "amount", "date"]
+    },
+    "Staff": {
+      "title": "Staff",
+      "description": "Staff or teacher record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "salary": { "type": "number" },
+        "whatsappNumber": { "type": "string" }
+      },
+      "required": ["id", "name", "role", "salary", "whatsappNumber"]
+    },
+    "StaffPayment": {
+      "title": "StaffPayment",
+      "description": "Salary payment record for staff",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "staffId": { "type": "string" },
+        "month": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "staffId", "month", "amount", "date"]
+    },
+    "TimetableEntry": {
+      "title": "TimetableEntry",
+      "description": "Entry in the class timetable",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "day": { "type": "string" },
+        "time": { "type": "string" },
+        "subject": { "type": "string" },
+        "classLevel": { "type": "string" },
+        "section": { "type": "string" }
+      },
+      "required": ["id", "day", "time", "subject", "classLevel", "section"]
+    },
+    "AcademySettings": {
+      "title": "AcademySettings",
+      "description": "Global settings for the academy",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "logo": { "type": "string" },
+        "lastBackup": { "type": "string" }
+      },
+      "required": ["name", "lastBackup"]
+    }
+  },
+  "firestore": {
+    "academies/{academyId}/students": {
+      "schema": "Student",
+      "description": "List of students in the academy"
+    },
+    "academies/{academyId}/subjects": {
+      "schema": "Subject",
+      "description": "Subjects taught in the academy"
+    },
+    "academies/{academyId}/sections": {
+      "schema": "Section",
+      "description": "Class sections"
+    },
+    "academies/{academyId}/attendance": {
+      "schema": "AttendanceRecord",
+      "description": "Attendance records"
+    },
+    "academies/{academyId}/tests": {
+      "schema": "Test",
+      "description": "Tests and exams"
+    },
+    "academies/{academyId}/testResults": {
+      "schema": "TestResult",
+      "description": "Student test results"
+    },
+    "academies/{academyId}/feePayments": {
+      "schema": "FeePayment",
+      "description": "Fee payment history"
+    },
+    "academies/{academyId}/staff": {
+      "schema": "Staff",
+      "description": "Staff and teachers"
+    },
+    "academies/{academyId}/staffPayments": {
+      "schema": "StaffPayment",
+      "description": "Staff salary payments"
+    },
+    "academies/{academyId}/timetable": {
+      "schema": "TimetableEntry",
+      "description": "Class schedules"
+    },
+    "academies/{academyId}/settings/global": {
+      "schema": "AcademySettings",
+      "description": "Academy global configuration"
+    }
+  }
+}
