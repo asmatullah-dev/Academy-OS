@@ -3,6 +3,7 @@ import { AppData, Student, Subject, Section, AttendanceRecord, Test, TestResult,
 import { db, auth } from '../firebase';
 import { collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../firestoreUtils';
+import { generateId } from '../utils';
 
 const STORAGE_KEY = 'academy_os_data';
 const ACADEMY_ID = 'main_academy'; // Fixed ID for the primary school
@@ -185,7 +186,9 @@ export function useAppData() {
           
           // Delete removed items
           for (const item of deletedItems) {
-            promises.push(deleteDoc(doc(db, `academies/${ACADEMY_ID}/${coll}`, item.id)));
+            if (item.id) {
+              promises.push(deleteDoc(doc(db, `academies/${ACADEMY_ID}/${coll}`, item.id)));
+            }
           }
           
           // Update/Add items
@@ -194,7 +197,8 @@ export function useAppData() {
             if (!oldItem || JSON.stringify(oldItem) !== JSON.stringify(item)) {
               // Strip undefined values which cause Firestore errors
               const cleanItem = JSON.parse(JSON.stringify(item));
-              promises.push(setDoc(doc(db, `academies/${ACADEMY_ID}/${coll}`, item.id), cleanItem));
+              const itemId = item.id || generateId(); // Fallback if id is missing
+              promises.push(setDoc(doc(db, `academies/${ACADEMY_ID}/${coll}`, itemId), cleanItem));
             }
           }
           

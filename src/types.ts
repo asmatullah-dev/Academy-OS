@@ -32,6 +32,7 @@ export interface Section {
 }
 
 export interface AttendanceRecord {
+  id: string;
   date: string; // ISO string
   studentId: string;
   status: 'Present' | 'Absent' | 'Late';

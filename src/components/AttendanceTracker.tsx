@@ -128,6 +128,7 @@ export default function AttendanceTracker({ data, updateData, studentUser }: { d
       newAttendance[existingIndex].status = status;
     } else {
       newAttendance.push({
+        id: `${selectedDate}_${studentId}`,
         date: selectedDate,
         studentId,
         status
@@ -145,6 +146,7 @@ export default function AttendanceTracker({ data, updateData, studentUser }: { d
         newAttendance[existingIndex].status = status;
       } else {
         newAttendance.push({
+          id: `${selectedDate}_${student.id}`,
           date: selectedDate,
           studentId: student.id,
           status
