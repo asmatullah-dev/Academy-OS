@@ -32,9 +32,8 @@ service cloud.firestore {
 
     function isMasterAdmin() {
       return isAuthenticated() && 
-        (
-          ("email" in request.auth.token && (request.auth.token.email.matches("(?i)asmatullah9327@gmail.com") || request.auth.token.email.matches("(?i)asmatn628@gmail.com")))
-        );
+        "email" in request.auth.token && 
+        (request.auth.token.email.lower() == "asmatullah9327@gmail.com" || request.auth.token.email.lower() == "asmatn628@gmail.com");
     }
 
     function isAdmin() {

@@ -334,6 +334,21 @@ export default function TestResultSystem({
                   <tbody className="divide-y divide-slate-50">
                     {(() => {
                       const studentsInTest = data.students.filter(s => s.classLevel === selectedTest.classLevel && s.section === selectedTest.section);
+                      
+                      if (studentsInTest.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                              <div className="flex flex-col items-center justify-center">
+                                <Users size={48} className="text-slate-300 mb-4" />
+                                <p className="text-lg font-medium text-slate-900">No students found</p>
+                                <p className="text-sm">There are no students in Class {selectedTest.classLevel} - {selectedTest.section}.</p>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }
+
                       const results = studentsInTest.map(s => {
                         const r = data.testResults.find(tr => tr.testId === selectedTest.id && tr.studentId === s.id);
                         return { student: s, result: r };

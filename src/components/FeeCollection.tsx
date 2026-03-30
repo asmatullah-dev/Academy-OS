@@ -254,103 +254,115 @@ export default function FeeCollection({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredStudents.map((student) => {
-                const currentMonth = format(new Date(), 'MMMM yyyy');
-                const payment = data.feePayments.find(p => p.studentId === student.id && p.month === currentMonth);
-                const paid = !!payment;
-                
-                return (
-                  <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-slate-900">{student.name}</div>
-                      <div className="text-[10px] text-slate-500">Roll: {student.rollNumber}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs font-medium text-slate-600">{student.classLevel} - {student.section}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {editingFeeId === student.id ? (
-                        <div className="flex items-center gap-2">
-                          <input 
-                            type="number"
-                            autoFocus
-                            className="w-20 px-2 py-1 border border-emerald-500 rounded-lg outline-none text-sm"
-                            value={tempFee}
-                            onChange={e => setTempFee(Number(e.target.value))}
-                            onKeyDown={e => e.key === 'Enter' && handleUpdateStudentFee(student.id)}
-                          />
-                          <button onClick={() => handleUpdateStudentFee(student.id)} className="text-emerald-500"><CheckCircle size={16} /></button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 group/fee">
-                          <span className="text-sm font-bold text-slate-900">{student.fee}</span>
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => {
+                  const currentMonth = format(new Date(), 'MMMM yyyy');
+                  const payment = data.feePayments.find(p => p.studentId === student.id && p.month === currentMonth);
+                  const paid = !!payment;
+                  
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-semibold text-slate-900">{student.name}</div>
+                        <div className="text-[10px] text-slate-500">Roll: {student.rollNumber}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-xs font-medium text-slate-600">{student.classLevel} - {student.section}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {editingFeeId === student.id ? (
+                          <div className="flex items-center gap-2">
+                            <input 
+                              type="number"
+                              autoFocus
+                              className="w-20 px-2 py-1 border border-emerald-500 rounded-lg outline-none text-sm"
+                              value={tempFee}
+                              onChange={e => setTempFee(Number(e.target.value))}
+                              onKeyDown={e => e.key === 'Enter' && handleUpdateStudentFee(student.id)}
+                            />
+                            <button onClick={() => handleUpdateStudentFee(student.id)} className="text-emerald-500"><CheckCircle size={16} /></button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 group/fee">
+                            <span className="text-sm font-bold text-slate-900">{student.fee}</span>
+                            <button 
+                              onClick={() => { setEditingFeeId(student.id); setTempFee(student.fee); }}
+                              className="opacity-0 group-hover/fee:opacity-100 text-slate-400 hover:text-blue-500 transition-all"
+                            >
+                              <Edit3 size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {paid ? (
+                          <span className="text-sm font-bold text-emerald-600">{payment.amount}</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <input 
+                              type="number"
+                              placeholder={student.fee.toString()}
+                              className="w-20 px-2 py-1 border border-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                              value={quickAmounts[student.id] === undefined ? '' : quickAmounts[student.id]}
+                              onChange={e => setQuickAmounts({ ...quickAmounts, [student.id]: Number(e.target.value) })}
+                            />
+                            <button 
+                              onClick={() => handleQuickCollect(student.id)}
+                              className="px-2 py-1 bg-emerald-500 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-600 transition-all shadow-sm"
+                            >
+                              Collect
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold",
+                          paid ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                        )}>
+                          {paid ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                          {paid ? 'Paid' : 'Unpaid'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
                           <button 
-                            onClick={() => { setEditingFeeId(student.id); setTempFee(student.fee); }}
-                            className="opacity-0 group-hover/fee:opacity-100 text-slate-400 hover:text-blue-500 transition-all"
+                            onClick={() => paid ? sendReceipt(payment) : sendReminder(student.id)}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all shadow-sm",
+                              paid ? "bg-emerald-500 text-white hover:bg-emerald-600" : "bg-amber-500 text-white hover:bg-amber-600"
+                            )}
+                            title={paid ? "Send Receipt" : "Send Reminder"}
                           >
-                            <Edit3 size={14} />
+                            <MessageSquare size={14} />
+                            {paid ? 'Receipt' : 'Reminder'}
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setFormData({ ...formData, studentId: student.id, amount: student.fee });
+                              setIsModalOpen(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
+                            title="Advanced Collect"
+                          >
+                            <CreditCard size={18} />
                           </button>
                         </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {paid ? (
-                        <span className="text-sm font-bold text-emerald-600">{payment.amount}</span>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <input 
-                            type="number"
-                            placeholder={student.fee.toString()}
-                            className="w-20 px-2 py-1 border border-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                            value={quickAmounts[student.id] === undefined ? '' : quickAmounts[student.id]}
-                            onChange={e => setQuickAmounts({ ...quickAmounts, [student.id]: Number(e.target.value) })}
-                          />
-                          <button 
-                            onClick={() => handleQuickCollect(student.id)}
-                            className="px-2 py-1 bg-emerald-500 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-600 transition-all shadow-sm"
-                          >
-                            Collect
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold",
-                        paid ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-                      )}>
-                        {paid ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
-                        {paid ? 'Paid' : 'Unpaid'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          onClick={() => paid ? sendReceipt(payment) : sendReminder(student.id)}
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all shadow-sm",
-                            paid ? "bg-emerald-500 text-white hover:bg-emerald-600" : "bg-amber-500 text-white hover:bg-amber-600"
-                          )}
-                          title={paid ? "Send Receipt" : "Send Reminder"}
-                        >
-                          <MessageSquare size={14} />
-                          {paid ? 'Receipt' : 'Reminder'}
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setFormData({ ...formData, studentId: student.id, amount: student.fee });
-                            setIsModalOpen(true);
-                          }}
-                          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-                          title="Advanced Collect"
-                        >
-                          <CreditCard size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <CreditCard size={48} className="text-slate-300 mb-4" />
+                      <p className="text-lg font-medium text-slate-900">No students found</p>
+                      <p className="text-sm">Try adjusting your search or filters.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -49,16 +49,25 @@ export function useAppData() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setCurrentUser(user);
       if (user && !user.isAnonymous) {
-        if (user.email?.toLowerCase() === 'asmatn628@gmail.com' || user.email?.toLowerCase() === 'asmatullah9327@gmail.com') {
+        const email = user.email?.trim().toLowerCase();
+        if (email === 'asmatn628@gmail.com' || email === 'asmatullah9327@gmail.com') {
           setIsAdminUser(true);
           setPermissionDenied(false);
-        } else if (user.email) {
+        } else if (email) {
           // Check if user is in staff collection
           try {
             const { getDoc, doc } = await import('firebase/firestore');
-            const staffDoc = await getDoc(doc(db, `academies/${ACADEMY_ID}/staff`, user.email.toLowerCase()));
-            if (staffDoc.exists() && staffDoc.data().role === 'admin') {
-              setIsAdminUser(true);
+            const staffDoc = await getDoc(doc(db, `academies/${ACADEMY_ID}/staff`, email));
+            
+            if (staffDoc.exists()) {
+              const role = staffDoc.data().role?.toLowerCase();
+              if (role === 'admin' || role === 'superadmin') {
+                setIsAdminUser(true);
+                setPermissionDenied(false);
+              } else {
+                setIsAdminUser(false);
+                setPermissionDenied(true);
+              }
             } else {
               setIsAdminUser(false);
               setPermissionDenied(true);
@@ -66,11 +75,7 @@ export function useAppData() {
           } catch (err: any) {
             console.error('Error checking admin status:', err);
             setIsAdminUser(false);
-            if (err.code === 'permission-denied' || err.message?.includes('Missing or insufficient permissions')) {
-              handleFirestoreError(err, OperationType.GET, `academies/${ACADEMY_ID}/staff/${user.email.toLowerCase()}`);
-            } else {
-              setPermissionDenied(true);
-            }
+            setPermissionDenied(true);
           }
         }
       } else {

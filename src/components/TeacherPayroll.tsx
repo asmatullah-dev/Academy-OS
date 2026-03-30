@@ -39,12 +39,14 @@ export default function TeacherPayroll({ data, updateData, studentUser }: { data
 
   const handleStaffSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const email = formData.email?.trim().toLowerCase();
     const newStaff: Staff = {
-      id: generateId(),
+      id: email || generateId(),
       name: formData.name!,
       role: formData.role!,
       salary: Number(formData.salary || 0),
       whatsappNumber: formData.whatsappNumber!,
+      email: email,
     };
     updateData({ staff: [...data.staff, newStaff] });
     setIsModalOpen(false);
@@ -181,96 +183,108 @@ export default function TeacherPayroll({ data, updateData, studentUser }: { data
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredStaff.map((staff) => {
-                  const currentMonth = format(new Date(), 'MMMM yyyy');
-                  const paid = data.staffPayments.some(p => p.staffId === staff.id && p.month === currentMonth);
-                  
-                  return (
-                    <tr key={staff.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-semibold text-slate-900">{staff.name}</div>
-                        {isAdmin && <div className="text-xs text-slate-500">{staff.whatsappNumber}</div>}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold">{staff.role}</span>
-                      </td>
-                      {isAdmin && (
-                        <>
-                          <td className="px-6 py-4">
-                            {editingSalaryId === staff.id ? (
-                              <div className="flex items-center gap-2">
-                                <input 
-                                  type="number"
-                                  autoFocus
-                                  className="w-24 px-2 py-1 border border-emerald-500 rounded-lg outline-none text-sm"
-                                  value={tempSalary}
-                                  onChange={e => setTempSalary(Number(e.target.value))}
-                                  onKeyDown={e => e.key === 'Enter' && handleUpdateSalary(staff.id)}
-                                />
-                                <button onClick={() => handleUpdateSalary(staff.id)} className="text-emerald-500"><CheckCircle size={16} /></button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 group/salary">
-                                <span className="text-sm font-bold text-slate-900">{staff.salary}</span>
+                {filteredStaff.length > 0 ? (
+                  filteredStaff.map((staff) => {
+                    const currentMonth = format(new Date(), 'MMMM yyyy');
+                    const paid = data.staffPayments.some(p => p.staffId === staff.id && p.month === currentMonth);
+                    
+                    return (
+                      <tr key={staff.id} className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-semibold text-slate-900">{staff.name}</div>
+                          {isAdmin && <div className="text-xs text-slate-500">{staff.whatsappNumber}</div>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold">{staff.role}</span>
+                        </td>
+                        {isAdmin && (
+                          <>
+                            <td className="px-6 py-4">
+                              {editingSalaryId === staff.id ? (
+                                <div className="flex items-center gap-2">
+                                  <input 
+                                    type="number"
+                                    autoFocus
+                                    className="w-24 px-2 py-1 border border-emerald-500 rounded-lg outline-none text-sm"
+                                    value={tempSalary}
+                                    onChange={e => setTempSalary(Number(e.target.value))}
+                                    onKeyDown={e => e.key === 'Enter' && handleUpdateSalary(staff.id)}
+                                  />
+                                  <button onClick={() => handleUpdateSalary(staff.id)} className="text-emerald-500"><CheckCircle size={16} /></button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 group/salary">
+                                  <span className="text-sm font-bold text-slate-900">{staff.salary}</span>
+                                  <button 
+                                    onClick={() => { setEditingSalaryId(staff.id); setTempSalary(staff.salary); }}
+                                    className="opacity-0 group-hover/salary:opacity-100 text-slate-400 hover:text-blue-500 transition-all"
+                                  >
+                                    <Edit3 size={14} />
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              {paid ? (
+                                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                                  <CheckCircle size={12} /> Paid
+                                </span>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <input 
+                                    type="number"
+                                    placeholder={staff.salary.toString()}
+                                    className="w-24 px-2 py-1 border border-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                                    value={quickSalaryAmounts[staff.id] === undefined ? '' : quickSalaryAmounts[staff.id]}
+                                    onChange={e => setQuickSalaryAmounts({ ...quickSalaryAmounts, [staff.id]: Number(e.target.value) })}
+                                  />
+                                  <button 
+                                    onClick={() => handleQuickPay(staff.id)}
+                                    className="px-3 py-1 bg-emerald-500 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-600 transition-all shadow-sm"
+                                  >
+                                    Pay
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex justify-end gap-2">
                                 <button 
-                                  onClick={() => { setEditingSalaryId(staff.id); setTempSalary(staff.salary); }}
-                                  className="opacity-0 group-hover/salary:opacity-100 text-slate-400 hover:text-blue-500 transition-all"
+                                  onClick={() => {
+                                    setPaymentFormData({ ...paymentFormData, staffId: staff.id, amount: staff.salary });
+                                    setActiveTab('payments');
+                                    setIsModalOpen(true);
+                                  }}
+                                  className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
+                                  title="Pay Salary"
                                 >
-                                  <Edit3 size={14} />
+                                  <CreditCard size={18} />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteStaff(staff.id)}
+                                  className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                                  title="Remove"
+                                >
+                                  <Trash2 size={18} />
                                 </button>
                               </div>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            {paid ? (
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                                <CheckCircle size={12} /> Paid
-                              </span>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <input 
-                                  type="number"
-                                  placeholder={staff.salary.toString()}
-                                  className="w-24 px-2 py-1 border border-slate-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                                  value={quickSalaryAmounts[staff.id] === undefined ? '' : quickSalaryAmounts[staff.id]}
-                                  onChange={e => setQuickSalaryAmounts({ ...quickSalaryAmounts, [staff.id]: Number(e.target.value) })}
-                                />
-                                <button 
-                                  onClick={() => handleQuickPay(staff.id)}
-                                  className="px-3 py-1 bg-emerald-500 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-600 transition-all shadow-sm"
-                                >
-                                  Pay
-                                </button>
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button 
-                                onClick={() => {
-                                  setPaymentFormData({ ...paymentFormData, staffId: staff.id, amount: staff.salary });
-                                  setActiveTab('payments');
-                                  setIsModalOpen(true);
-                                }}
-                                className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-                                title="Pay Salary"
-                              >
-                                <CreditCard size={18} />
-                              </button>
-                              <button 
-                                onClick={() => handleDeleteStaff(staff.id)}
-                                className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                                title="Remove"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  );
-                })}
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={isAdmin ? 5 : 2} className="px-6 py-12 text-center text-slate-500">
+                      <div className="flex flex-col items-center justify-center">
+                        <UserCheck size={48} className="text-slate-300 mb-4" />
+                        <p className="text-lg font-medium text-slate-900">No staff members found</p>
+                        <p className="text-sm">Try adjusting your search or add a new staff member.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -287,26 +301,38 @@ export default function TeacherPayroll({ data, updateData, studentUser }: { data
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {data.staffPayments.map((payment) => {
-                  const staff = data.staff.find(s => s.id === payment.staffId);
-                  return (
-                    <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">{staff?.name || 'Unknown'}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{payment.month}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-emerald-600">{payment.amount}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{payment.date}</td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => sendPaymentNotification(payment)}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-[10px] font-bold hover:bg-emerald-600 transition-all shadow-sm"
-                        >
-                          <MessageSquare size={12} />
-                          Resend
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {data.staffPayments.length > 0 ? (
+                  data.staffPayments.map((payment) => {
+                    const staff = data.staff.find(s => s.id === payment.staffId);
+                    return (
+                      <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-semibold text-slate-900">{staff?.name || 'Unknown'}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{payment.month}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-emerald-600">{payment.amount}</td>
+                        <td className="px-6 py-4 text-sm text-slate-500">{payment.date}</td>
+                        <td className="px-6 py-4 text-right">
+                          <button 
+                            onClick={() => sendPaymentNotification(payment)}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-[10px] font-bold hover:bg-emerald-600 transition-all shadow-sm"
+                          >
+                            <MessageSquare size={12} />
+                            Resend
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                      <div className="flex flex-col items-center justify-center">
+                        <History size={48} className="text-slate-300 mb-4" />
+                        <p className="text-lg font-medium text-slate-900">No payment logs found</p>
+                        <p className="text-sm">Record a payment to see it here.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -327,15 +353,27 @@ export default function TeacherPayroll({ data, updateData, studentUser }: { data
             <form onSubmit={activeTab === 'staff' ? handleStaffSubmit : handlePaymentSubmit} className="p-8 space-y-4">
               {activeTab === 'staff' ? (
                 <>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
-                    <input
-                      required
-                      type="text"
-                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
-                      value={formData.name || ''}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
+                      <input
+                        required
+                        type="text"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+                        value={formData.name || ''}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Email (Optional)</label>
+                      <input
+                        type="email"
+                        placeholder="For admin login"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+                        value={formData.email || ''}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase">Role / Designation</label>

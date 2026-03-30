@@ -263,67 +263,79 @@ export default function AttendanceTracker({ data, updateData, studentUser }: { d
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredStudents.map((student) => {
-                const status = getStatus(student.id);
-                return (
-                  <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-slate-900">{student.name}</div>
-                      <div className="text-[10px] text-slate-500">Roll: {student.rollNumber} | {student.classLevel}-{student.section}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-1">
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => {
+                  const status = getStatus(student.id);
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-semibold text-slate-900">{student.name}</div>
+                        <div className="text-[10px] text-slate-500">Roll: {student.rollNumber} | {student.classLevel}-{student.section}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-1">
+                          <button 
+                            onClick={() => setAttendanceStatus(student.id, 'Present')}
+                            className={cn(
+                              "p-2 rounded-lg transition-all",
+                              status === 'Present' ? "bg-emerald-100 text-emerald-700 shadow-sm" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                            )}
+                            title="Present"
+                          >
+                            <CheckCircle2 size={18} />
+                          </button>
+                          <button 
+                            onClick={() => setAttendanceStatus(student.id, 'Absent')}
+                            className={cn(
+                              "p-2 rounded-lg transition-all",
+                              status === 'Absent' ? "bg-rose-100 text-rose-700 shadow-sm" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                            )}
+                            title="Absent"
+                          >
+                            <XCircle size={18} />
+                          </button>
+                          <button 
+                            onClick={() => setAttendanceStatus(student.id, 'Late')}
+                            className={cn(
+                              "p-2 rounded-lg transition-all",
+                              status === 'Late' ? "bg-amber-100 text-amber-700 shadow-sm" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                            )}
+                            title="Late"
+                          >
+                            <Clock size={18} />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
                         <button 
-                          onClick={() => setAttendanceStatus(student.id, 'Present')}
+                          onClick={() => sendWhatsAppAlert(student.id, status)}
                           className={cn(
-                            "p-2 rounded-lg transition-all",
-                            status === 'Present' ? "bg-emerald-100 text-emerald-700 shadow-sm" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                            "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all shadow-sm",
+                            status === 'Absent' ? "bg-rose-500 text-white hover:bg-rose-600" : 
+                            status === 'Late' ? "bg-amber-500 text-white hover:bg-amber-600" :
+                            status === 'Present' ? "bg-emerald-500 text-white hover:bg-emerald-600" :
+                            "bg-slate-100 text-slate-400 cursor-not-allowed"
                           )}
-                          title="Present"
+                          disabled={status === 'Not Marked'}
                         >
-                          <CheckCircle2 size={18} />
+                          <MessageSquare size={12} />
+                          <span>Send Alert</span>
                         </button>
-                        <button 
-                          onClick={() => setAttendanceStatus(student.id, 'Absent')}
-                          className={cn(
-                            "p-2 rounded-lg transition-all",
-                            status === 'Absent' ? "bg-rose-100 text-rose-700 shadow-sm" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
-                          )}
-                          title="Absent"
-                        >
-                          <XCircle size={18} />
-                        </button>
-                        <button 
-                          onClick={() => setAttendanceStatus(student.id, 'Late')}
-                          className={cn(
-                            "p-2 rounded-lg transition-all",
-                            status === 'Late' ? "bg-amber-100 text-amber-700 shadow-sm" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
-                          )}
-                          title="Late"
-                        >
-                          <Clock size={18} />
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => sendWhatsAppAlert(student.id, status)}
-                        className={cn(
-                          "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all shadow-sm",
-                          status === 'Absent' ? "bg-rose-500 text-white hover:bg-rose-600" : 
-                          status === 'Late' ? "bg-amber-500 text-white hover:bg-amber-600" :
-                          status === 'Present' ? "bg-emerald-500 text-white hover:bg-emerald-600" :
-                          "bg-slate-100 text-slate-400 cursor-not-allowed"
-                        )}
-                        disabled={status === 'Not Marked'}
-                      >
-                        <MessageSquare size={12} />
-                        <span>Send Alert</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={3} className="px-6 py-12 text-center text-slate-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <Users size={48} className="text-slate-300 mb-4" />
+                      <p className="text-lg font-medium text-slate-900">No students found</p>
+                      <p className="text-sm">Try adjusting your search or filters.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

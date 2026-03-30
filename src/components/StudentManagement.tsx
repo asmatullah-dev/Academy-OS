@@ -177,68 +177,80 @@ export default function StudentManagement({ data, updateData, studentUser }: { d
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">{student.rollNumber}</td>
-                  <td className="px-6 py-4">
-                    <button 
-                      onClick={() => setSelectedStudent(student)}
-                      className="text-left group/name flex items-center gap-3"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden flex-shrink-0">
-                        {student.photo ? (
-                          <img src={student.photo} alt={student.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400">
-                            <User size={14} />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900 group-hover/name:text-emerald-600 transition-colors">{student.name}</div>
-                        <div className="text-xs text-slate-500">{student.fatherName}</div>
-                      </div>
-                    </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Class {student.classLevel} - {student.section}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{student.whatsappNumber}</td>
-                  {isAdmin && (
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          onClick={() => generateStudentResultCard(student, data)}
-                          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-                          title="Generate Report"
-                        >
-                          <FileText size={18} />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setEditingStudent(student);
-                            setFormData(student);
-                            setIsModalOpen(true);
-                          }}
-                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                          title="Edit"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(student.id)}
-                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                          title="Delete"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => (
+                  <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-6 py-4 text-sm font-medium text-slate-900">{student.rollNumber}</td>
+                    <td className="px-6 py-4">
+                      <button 
+                        onClick={() => setSelectedStudent(student)}
+                        className="text-left group/name flex items-center gap-3"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-slate-100 overflow-hidden flex-shrink-0">
+                          {student.photo ? (
+                            <img src={student.photo} alt={student.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                              <User size={14} />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-slate-900 group-hover/name:text-emerald-600 transition-colors">{student.name}</div>
+                          <div className="text-xs text-slate-500">{student.fatherName}</div>
+                        </div>
+                      </button>
                     </td>
-                  )}
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Class {student.classLevel} - {student.section}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{student.whatsappNumber}</td>
+                    {isAdmin && (
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => generateStudentResultCard(student, data)}
+                            className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
+                            title="Generate Report"
+                          >
+                            <FileText size={18} />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setEditingStudent(student);
+                              setFormData(student);
+                              setIsModalOpen(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                            title="Edit"
+                          >
+                            <Edit2 size={18} />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(student.id)}
+                            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                            title="Delete"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={isAdmin ? 5 : 4} className="px-6 py-12 text-center text-slate-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <User size={48} className="text-slate-300 mb-4" />
+                      <p className="text-lg font-medium text-slate-900">No students found</p>
+                      <p className="text-sm">Try adjusting your search or add a new student.</p>
+                    </div>
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

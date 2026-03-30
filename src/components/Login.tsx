@@ -29,7 +29,7 @@ export default function Login({ data, authError }: { data: AppData, authError?: 
       await loginWithGoogle();
     } catch (err: any) {
       console.error(err);
-      setError('Google Login failed. Please try again.');
+      setError(`Google Login failed: ${err.message || 'Please try again.'}`);
     } finally {
       setLoading(false);
     }

@@ -67,6 +67,7 @@ export interface Staff { // Renamed from Teacher
   role: string;
   salary: number;
   whatsappNumber: string;
+  email?: string;
 }
 
 export interface StaffPayment { // Renamed from SalaryPayment
